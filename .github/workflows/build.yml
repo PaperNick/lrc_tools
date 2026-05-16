@@ -13,15 +13,21 @@ jobs:
         include:
           - os: ubuntu-24.04
             display: Linux-x64
+            artifact: lrc_tools
           - os: windows-2025
             display: Windows-x64
+            artifact: lrc_tools.exe
           - os: macos-15-intel
             display: macOS-x64
+            artifact: lrc_tools
           - os: macos-15
             display: macOS-ARM64
+            artifact: lrc_tools
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -41,20 +47,11 @@ jobs:
         run: |
           pyinstaller lrc_tools.spec
 
-      - name: Upload binary
-        uses: actions/upload-artifact@v6
-        with:
-          name: lrc_tools-${{ matrix.display }}
-          path: |
-            dist/lrc_tools*
-            dist/*.exe
-          if-no-files-found: error
-
       - name: Upload to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/lrc_tools*
+          file: dist/${{ matrix.artifact }}
+          asset_name: lrc_tools-${{ matrix.display }}
           tag: ${{ github.ref }}
           overwrite: true
-          file_glob: true
