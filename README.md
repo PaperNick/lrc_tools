@@ -2,17 +2,30 @@
 
 Unified CLI for embedding, extracting, cleaning, and inspecting LRC lyrics in MP3 files.
 
+
 ## Requirements
 
 - Python 3.10+
 - [mutagen](https://mutagen.readthedocs.io/) - audio metadata library
 
+
 ## Install
 
-Build a standalone binary with PyInstaller:
+
+### Pre-built binaries
+
+> [!NOTE]
+> Pre-built binaries for Linux, Windows, and macOS are available on the [releases page](https://github.com/PaperNick/lrc_tools/releases).
+
+
+### Build from source
+
+Create a virtual environment, install dependencies, and build with PyInstaller:
 
 ```shell
-pip install mutagen pyinstaller
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 pyinstaller lrc_tools.spec
 ```
 
@@ -20,16 +33,18 @@ The binary will be at `dist/lrc_tools`. Copy it anywhere on your `PATH`:
 
 ```shell
 cp dist/lrc_tools ~/.local/bin/
+deactivate
 ```
 
-You can also run each script directly with Python without building:
+### Run with Python directly
+
+Each script can be run without building:
 
 ```shell
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 python3 src/lrc_tools.py --help
-python3 src/lrc_embed.py --help
-python3 src/lrc_extract.py --help
-python3 src/lrc_clean.py --help
-python3 src/lrc_type.py --help
 ```
 
 ## Usage
