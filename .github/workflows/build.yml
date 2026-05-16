@@ -47,11 +47,20 @@ jobs:
         run: |
           pyinstaller lrc_tools.spec
 
+      - name: Package binary into zip
+        shell: bash
+        run: |
+          cd dist
+          if [[ "${{ runner.os }}" == Windows ]]; then
+            7z a "../lrc_tools-${{ matrix.display }}.zip" lrc_tools.exe
+          else
+            zip "../lrc_tools-${{ matrix.display }}.zip" lrc_tools
+          fi
+
       - name: Upload to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/${{ matrix.artifact }}
-          asset_name: lrc_tools-${{ matrix.display }}
+          file: lrc_tools-${{ matrix.display }}.zip
           tag: ${{ github.ref }}
           overwrite: true
