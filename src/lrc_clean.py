@@ -62,12 +62,14 @@ def confirm_action(description: str) -> bool:
 def build_parser(subparser) -> None:
     subparser.add_argument("mp3_file", nargs="?", help="MP3 file to clean lyric metadata from")
     subparser.add_argument(
-        "--sylt-only", action="store_true", help="Only remove SYLT (synchronized lyrics), keep USLT"
+        "--timed-only",
+        action="store_true",
+        help="Only remove timed lyrics (SYLT), keep plain (USLT)",
     )
     subparser.add_argument(
-        "--uslt-only",
+        "--plain-only",
         action="store_true",
-        help="Only remove USLT (unsynchronized lyrics), keep SYLT",
+        help="Only remove plain lyrics (USLT), keep timed (SYLT)",
     )
     subparser.add_argument(
         "--dry-run",
@@ -89,8 +91,8 @@ def main() -> None:
         parser.print_help()
         sys.exit(1)
 
-    if args.sylt_only and args.uslt_only:
-        print("Error: Both --sylt-only and --uslt-only specified, nothing would be removed.")
+    if args.timed_only and args.plain_only:
+        print("Error: Both --timed-only and --plain-only specified, nothing would be removed.")
         sys.exit(1)
 
     mp3_path = Path(args.mp3_file)
@@ -101,9 +103,9 @@ def main() -> None:
         print(f"Error: Not an MP3 file: {mp3_path}")
         sys.exit(1)
 
-    if args.sylt_only:
+    if args.timed_only:
         remove_sylt, remove_uslt = True, False
-    elif args.uslt_only:
+    elif args.plain_only:
         remove_sylt, remove_uslt = False, True
     else:
         remove_sylt, remove_uslt = True, True

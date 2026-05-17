@@ -236,10 +236,10 @@ def build_parser(subparser) -> None:
         help="3-letter ISO 639-2 language code (auto-detected from filename, fallback 'eng')",
     )
     subparser.add_argument(
-        "--no-sylt", action="store_true", help="Skip embedding SYLT (synchronized) lyrics"
+        "--no-timed", action="store_true", help="Skip embedding timed lyrics (SYLT)"
     )
     subparser.add_argument(
-        "--no-uslt", action="store_true", help="Skip embedding USLT (unsynchronized lyrics)"
+        "--no-plain", action="store_true", help="Skip embedding plain lyrics (USLT)"
     )
     subparser.add_argument(
         "--output", "-o", help='Output file path (default: "source (lyrics).mp3")'
@@ -268,8 +268,8 @@ def main() -> None:
         parser.print_help()
         sys.exit(1)
 
-    if args.no_sylt and args.no_uslt:
-        print("Error: Both --no-sylt and --no-uslt specified. Nothing to do.")
+    if args.no_timed and args.no_plain:
+        print("Error: Both --no-timed and --no-plain specified. Nothing to do.")
         sys.exit(1)
 
     mp3_path = Path(args.mp3_file)
@@ -307,8 +307,8 @@ def main() -> None:
     lrc_timed = lrc_has_timestamps(lrc_path)
     print(f"  LRC type: {'TIMED' if lrc_timed else 'PLAIN'}")
 
-    do_sylt = not args.no_sylt and lrc_timed
-    do_uslt = not args.no_uslt
+    do_sylt = not args.no_timed and lrc_timed
+    do_uslt = not args.no_plain
 
     # Check what the source already has before any copy
     skip_sylt = do_sylt and has_frame(mp3_path, "SYLT")

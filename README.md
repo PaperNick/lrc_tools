@@ -85,9 +85,9 @@ lrc_tools embed song.mp3 --in-place
 # Write to a specific output file
 lrc_tools embed song.mp3 --output tagged.mp3
 
-# Skip SYLT or USLT
-lrc_tools embed song.mp3 --no-sylt
-lrc_tools embed song.mp3 --no-uslt
+# Skip embedding timed (SYLT) or plain (USLT) lyrics
+lrc_tools embed song.mp3 --no-timed
+lrc_tools embed song.mp3 --no-plain
 
 # Preview without writing
 lrc_tools embed song.mp3 --dry-run
@@ -124,9 +124,9 @@ Remove SYLT/USLT frames from an MP3.
 # Remove all lyrics frames
 lrc_tools clean song.mp3
 
-# Remove only SYLT or only USLT
-lrc_tools clean song.mp3 --sylt-only
-lrc_tools clean song.mp3 --uslt-only
+# Remove only timed (SYLT) or only plain (USLT) lyrics
+lrc_tools clean song.mp3 --timed-only
+lrc_tools clean song.mp3 --plain-only
 
 # Skip confirmation prompt
 lrc_tools clean song.mp3 --yes
