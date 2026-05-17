@@ -176,15 +176,19 @@ Confirms before modifying by default. Use `--yes` or `-y` to skip.
 
 Inspect an MP3 or LRC file and print its type classification.
 
+Check an MP3 file:
+
 ```shell
-# Check an MP3
 lrc_tools inspect song.mp3
 # SYLT+USLT: song.mp3
 # SYLT: song.mp3
 # USLT: song.mp3
 # NO_LYRICS: song.mp3
+```
 
-# Check an LRC file
+Check an LRC file:
+
+```shell
 lrc_tools inspect lyrics.lrc
 # TIMED: lyrics.lrc
 # PLAIN: lyrics.lrc
