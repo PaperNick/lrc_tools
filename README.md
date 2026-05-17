@@ -176,14 +176,14 @@ Inspect an MP3 or LRC file and print its type classification.
 ```shell
 # Check an MP3
 lrc_tools inspect song.mp3
-# → SYLT+USLT: song.mp3
-# → SYLT_ONLY: song.mp3
-# → USLT_ONLY: song.mp3
-# → NO_LYRICS: song.mp3
+# SYLT+USLT: song.mp3
+# SYLT: song.mp3
+# USLT: song.mp3
+# NO_LYRICS: song.mp3
 
 # Check an LRC file
 lrc_tools inspect lyrics.lrc
-# → TIMED: lyrics.lrc
-# → PLAIN: lyrics.lrc
-# → EMPTY: lyrics.lrc
+# TIMED: lyrics.lrc
+# PLAIN: lyrics.lrc
+# EMPTY: lyrics.lrc
 ```

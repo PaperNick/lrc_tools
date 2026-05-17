@@ -14,8 +14,8 @@ EMPTY = "EMPTY"
 
 # MP3 classification results
 SYLT_PLUS_USLT = "SYLT+USLT"
-SYLT_ONLY = "SYLT_ONLY"
-USLT_ONLY = "USLT_ONLY"
+SYLT = "SYLT"
+USLT = "USLT"
 NO_LYRICS = "NO_LYRICS"
 
 ERROR = "ERROR"
@@ -59,9 +59,9 @@ def classify_mp3(mp3_path: Path) -> str:
     if has_sylt and has_uslt:
         return SYLT_PLUS_USLT
     if has_sylt:
-        return SYLT_ONLY
+        return SYLT
     if has_uslt:
-        return USLT_ONLY
+        return USLT
     return NO_LYRICS
 
 
