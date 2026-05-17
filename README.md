@@ -33,7 +33,6 @@ The binary will be at `dist/lrc_tools`. Copy it anywhere on your `PATH`:
 
 ```shell
 cp dist/lrc_tools ~/.local/bin/
-deactivate
 ```
 
 ### Run with Python directly
@@ -41,9 +40,6 @@ deactivate
 Each script can be run without building:
 
 ```shell
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 python3 src/lrc_tools.py --help
 ```
 
@@ -123,7 +119,7 @@ lrc_tools embed song.mp3 --no-plain
 lrc_tools embed song.mp3 --dry-run
 ```
 
-If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g. `son.ko.lrc` for `song.mp3`). Language is auto-detected from the filename suffix (e.g. `.ko.lrc` -> `kor`), and defaults to `eng`.
+If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g. `song.ko.lrc` for `song.mp3`). Language is auto-detected from the filename suffix (e.g. `.ko.lrc` -> `kor`), and defaults to `eng`.
 
 ---
 
@@ -132,7 +128,7 @@ If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g
 Extract embedded SYLT/USLT lyrics from an MP3 to an LRC file.
 
 ```shell
-# Extract to auto-named file (e.g. Song.en.lrc)
+# Extract to auto-named file (e.g. song.en.lrc)
 lrc_tools extract song.mp3
 
 # Specify output path
@@ -142,7 +138,7 @@ lrc_tools extract song.mp3 --output lyrics.lrc
 lrc_tools extract song.mp3 --dry-run
 ```
 
-Output is named `{stem}.{lang_2letter}.lrc` by default (e.g. `Song.en.lrc`). SYLT is preferred over USLT when both are present.
+Output is named `{stem}.{lang_2letter}.lrc` by default (e.g. `song.en.lrc`). SYLT is preferred over USLT when both are present.
 
 ---
 
