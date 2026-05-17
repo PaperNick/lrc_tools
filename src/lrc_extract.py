@@ -3,32 +3,12 @@
 import argparse
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 from mutagen.id3 import ID3, ID3NoHeaderError
 
-from language import lang_3to2
-
-
-def format_timestamp(time_ms: int) -> str:
-    """Convert milliseconds to LRC timestamp [mm:ss.xx]."""
-    minutes, rest = divmod(time_ms, 60_000)
-    seconds, centiseconds = divmod(rest, 1000)
-    centiseconds //= 10
-    return f"[{minutes:02d}:{seconds:02d}.{centiseconds:02d}]"
-
-
-def sylt_to_lrc(entries: List[Tuple[str, int]]) -> str:
-    """Convert SYLT entries [(text, ms)] to LRC format string."""
-    lines = []
-    for text, time_ms in entries:
-        if time_ms == 0:
-            lines.append(text)
-        elif text:
-            lines.append(f"{format_timestamp(time_ms)} {text}")
-        else:
-            lines.append(f"{format_timestamp(time_ms)} ")
-    return "\n".join(lines)
+from utils.language import lang_3to2
+from utils.parsing import sylt_to_lrc
+from utils.timestamps import format_timestamp
 
 
 def extract_lyrics(mp3_path: Path) -> dict:

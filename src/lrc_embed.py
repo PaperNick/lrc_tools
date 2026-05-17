@@ -10,82 +10,9 @@ from typing import List, Tuple
 from mutagen.id3 import ID3, SYLT, USLT, Encoding, ID3NoHeaderError
 from mutagen.mp3 import MP3
 
-from language import lang_2to3
-
-# LRC pattern: [mm:ss.xx] or [mm:ss.xxx]
-_RE_TIMESTAMP = re.compile(r"\[\d+:\d+(?:\.\d+)?\]")
-# Metadata tag: [ti:Title], [ar:Artist], etc.
-_RE_METADATA = re.compile(r"\[[a-z]+:.+\]", re.IGNORECASE)
-
-
-def parse_lrc_timestamps(lrc_content: str) -> List[Tuple[str, int]]:
-    """Parse LRC content into [(text, timestamp_ms)] tuples."""
-    entries: List[Tuple[str, int]] = []
-
-    for line in lrc_content.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            continue
-
-        timestamps = re.findall(r"\[(\d+):(\d+(?:\.\d+)?)\]", stripped)
-        text = _RE_TIMESTAMP.sub("", stripped).strip()
-
-        # Line is just a metadata tag like [ti:Title], skip it
-        if _RE_METADATA.match(text):
-            continue
-
-        if not timestamps:
-            if text:
-                entries.append((text, 0))
-            continue
-
-        # Use last timestamp
-        min_str, sec_str = timestamps[-1]
-        time_ms = int(int(min_str) * 60_000 + float(sec_str) * 1000)
-        entries.append((text, time_ms))
-
-    return entries
-
-
-def lrc_has_timestamps(lrc_path: Path) -> bool:
-    """Return True if the LRC file has timestamp lines."""
-    if not lrc_path.is_file():
-        return False
-    try:
-        content = lrc_path.read_text(encoding="utf-8")
-        return bool(_RE_TIMESTAMP.search(content))
-    except Exception:
-        return False
-
-
-def strip_timestamps(lrc_content: str) -> str:
-    """Strip LRC timestamps, keeping text lines in order."""
-    result_lines: List[str] = []
-
-    for line in lrc_content.splitlines():
-        stripped = line.strip()
-        if not stripped:
-            result_lines.append("")
-            continue
-
-        timestamps = _RE_TIMESTAMP.findall(stripped)
-        text = _RE_TIMESTAMP.sub("", stripped).strip()
-
-        # Line is just a metadata tag like [ti:Title], skip it
-        if _RE_METADATA.match(text):
-            continue
-
-        if not timestamps:
-            if text:
-                result_lines.append(text)
-            continue
-
-        result_lines.append(text if text else "")
-
-    while result_lines and result_lines[-1] == "":
-        result_lines.pop()
-
-    return "\n".join(result_lines)
+from utils.language import lang_2to3
+from utils.parsing import parse_lrc_timestamps
+from utils.timestamps import lrc_has_timestamps, strip_timestamps
 
 
 def detect_lang_from_filename(lrc_path: Path) -> str | None:

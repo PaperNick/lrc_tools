@@ -2,7 +2,10 @@ import json
 import sys
 from pathlib import Path
 
-BASE = Path(sys._MEIPASS) if getattr(sys, "frozen", False) else Path(__file__).parent
+if getattr(sys, "frozen", False):
+    BASE = Path(sys._MEIPASS)
+else:
+    BASE = Path(__file__).resolve().parent.parent
 
 _COUNTRY_TO_LANG = json.loads((BASE / "data" / "language_codes.json").read_text())[
     "COUNTRY_TO_LANG"
