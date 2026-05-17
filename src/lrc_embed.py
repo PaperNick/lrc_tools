@@ -10,7 +10,7 @@ from typing import List, Tuple
 from mutagen.id3 import ID3, SYLT, USLT, Encoding, ID3NoHeaderError
 from mutagen.mp3 import MP3
 
-from utils.language import lang_2to3
+from utils.language import lang_2to3, FALLBACK_LANG3
 from utils.parsing import parse_lrc_timestamps
 from utils.timestamps import lrc_has_timestamps, strip_timestamps
 
@@ -25,10 +25,10 @@ def detect_lang_from_filename(lrc_path: Path) -> str | None:
 
 
 def resolve_lang(cli_lang: str | None, lrc_path: Path) -> str:
-    """Resolve language: --lang flag, filename detection, or 'eng'."""
+    """Resolve language: --lang flag, filename detection."""
     if cli_lang:
         return cli_lang
-    return detect_lang_from_filename(lrc_path) or "eng"
+    return detect_lang_from_filename(lrc_path) or FALLBACK_LANG3
 
 
 def open_or_create_id3(mp3_path: Path):
@@ -160,7 +160,7 @@ def build_parser(subparser) -> None:
     )
     subparser.add_argument(
         "--lang",
-        help="3-letter ISO 639-2 language code (auto-detected from filename, fallback 'eng')",
+        help=f"3-letter ISO 639-2 language code (auto-detected from filename, fallback '{FALLBACK_LANG3}')",
     )
     subparser.add_argument(
         "--no-timed", action="store_true", help="Skip embedding timed lyrics (SYLT)"

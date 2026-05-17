@@ -131,6 +131,10 @@ Extract embedded SYLT/USLT lyrics from an MP3 to an LRC file.
 # Extract to auto-named file (e.g. song.en.lrc)
 lrc_tools extract song.mp3
 
+# Extract only timed (SYLT) or only plain (USLT) lyrics
+lrc_tools extract song.mp3 timed
+lrc_tools extract song.mp3 plain
+
 # Specify output path
 lrc_tools extract song.mp3 --output lyrics.lrc
 
@@ -138,7 +142,10 @@ lrc_tools extract song.mp3 --output lyrics.lrc
 lrc_tools extract song.mp3 --dry-run
 ```
 
-Output is named `{stem}.{lang_2letter}.lrc` by default (e.g. `song.en.lrc`). SYLT is preferred over USLT when both are present.
+Output is named `{stem}.{lang_2letter}.lrc` by default (e.g. `song.en.lrc`).
+
+When no `kind` is specified, SYLT is preferred over USLT when both are present.
+Use `timed` or `plain` to extract a specific type only.
 
 ---
 

@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from utils.id3 import LyricsData, read_lyrics
-from utils.language import lang_3to2
+from utils.language import lang_3to2, FALLBACK_LANG3
 from utils.parsing import sylt_to_lrc
 from utils.timestamps import format_timestamp
 
@@ -29,7 +29,7 @@ def validate_args(args, parser) -> Path:
 
 def _language_header(lang_code: str | None) -> str:
     """Resolve language code into a 'Language: xx' header line."""
-    lang = lang_code or "eng"
+    lang = lang_code or FALLBACK_LANG3
     return f"Language: {lang_3to2(lang)}"
 
 
@@ -66,7 +66,7 @@ def print_summary(mp3_path: Path, data: LyricsData) -> None:
     print(mp3_path, file=sys.stderr)
 
     if data.has_sylt:
-        sylt_lang = data.sylt_lang or "eng"
+        sylt_lang = data.sylt_lang or FALLBACK_LANG3
         lang_2letter = lang_3to2(sylt_lang)
         count = len(data.sylt_entries)
         print(
@@ -75,7 +75,7 @@ def print_summary(mp3_path: Path, data: LyricsData) -> None:
         )
 
     if data.has_uslt:
-        uslt_lang = data.uslt_lang or "eng"
+        uslt_lang = data.uslt_lang or FALLBACK_LANG3
         lang_2letter = lang_3to2(uslt_lang)
         text_len = len(data.uslt_text)
         print(

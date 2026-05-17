@@ -3,21 +3,79 @@
 import argparse
 import sys
 from pathlib import Path
+from typing import Tuple
 
 from utils.id3 import LyricsData, read_lyrics
-from utils.language import lang_3to2
+from utils.language import lang_3to2, FALLBACK_LANG3
 from utils.parsing import sylt_to_lrc
-from utils.timestamps import format_timestamp
 
 
-def output_path(mp3_path: Path, lang_2letter: str, output_arg: str | None) -> Path:
-    if output_arg:
-        return Path(output_arg)
+def _extract_timed(data: LyricsData) -> Tuple[str, str]:
+    """Extract SYLT as LRC content."""
+    if not data.has_sylt:
+        print("  No timed lyrics (SYLT) found.")
+        sys.exit(1)
+
+    lang_2letter = lang_3to2(data.sylt_lang or FALLBACK_LANG3)
+    count = len(data.sylt_entries)
+    print(f"  Found SYLT: {count} timed entries (lang: {data.sylt_lang} -> {lang_2letter})")
+    return sylt_to_lrc(data.sylt_entries), lang_2letter
+
+
+def _extract_plain(data: LyricsData) -> Tuple[str, str]:
+    """Extract USLT as LRC content."""
+    if not data.has_uslt:
+        print("  No plain lyrics (USLT) found.")
+        sys.exit(1)
+
+    lang_2letter = lang_3to2(data.uslt_lang or FALLBACK_LANG3)
+    print(f"  Found USLT: plain lyrics (lang: {data.uslt_lang} -> {lang_2letter})")
+    return data.uslt_text.strip() + "\n", lang_2letter
+
+
+def _extract_auto(data: LyricsData) -> Tuple[str, str]:
+    """Prefer SYLT, fall back to USLT."""
+    if not data.has_sylt and not data.has_uslt:
+        print("No embedded lyrics found (no SYLT or USLT frames).")
+        sys.exit(1)
+
+    if data.has_sylt:
+        if data.has_uslt:
+            print(f"  Also has USLT (lang: {data.uslt_lang}) - using SYLT as primary source")
+        return _extract_timed(data)
+    return _extract_plain(data)
+
+
+def _resolve_output(mp3_path: Path, lang_2letter: str, output_path: str | None) -> Path:
+    if output_path:
+        return Path(output_path)
+
     return mp3_path.with_name(f"{mp3_path.stem}.{lang_2letter}.lrc")
+
+
+def _write_lrc(out: Path, content: str, dry_run: bool) -> None:
+    print(f"  Output: {out}")
+
+    if out.exists():
+        print("  WARNING: Output file already exists, will overwrite")
+
+    if dry_run:
+        print(f"  [DRY RUN] Would write {len(content)} bytes to {out}")
+        return
+
+    out.write_text(content, encoding="utf-8")
+    print(f"  Written: {out} ({len(content)} bytes, {content.count('\n')} lines)")
 
 
 def build_parser(subparser) -> None:
     subparser.add_argument("mp3_file", nargs="?", help="MP3 file to extract lyrics from")
+    subparser.add_argument(
+        "kind",
+        nargs="?",
+        choices=["timed", "plain"],
+        default=None,
+        help="Type of lyrics to extract: 'timed' (SYLT) or 'plain' (USLT). If omitted, extracts SYLT with fallback to USLT.",
+    )
     subparser.add_argument(
         "--output",
         "-o",
@@ -50,41 +108,15 @@ def main() -> None:
         print(f"Error: Not an MP3 file: {mp3_path}")
         sys.exit(1)
 
-    data = read_lyrics(mp3_path)
-
-    if not data.has_sylt and not data.has_uslt:
-        print("No embedded lyrics found (no SYLT or USLT frames).")
-        sys.exit(1)
-
     print(mp3_path)
 
-    if data.has_sylt:
-        sylt_lang = data.sylt_lang or "eng"
-        lang_2letter = lang_3to2(sylt_lang)
-        lrc_content = sylt_to_lrc(data.sylt_entries)
-        print(
-            f"  Found SYLT: {len(data.sylt_entries)} timed entries (lang: {sylt_lang} -> {lang_2letter})"
-        )
-        if data.has_uslt:
-            print(f"  Also has USLT (lang: {data.uslt_lang}) - using SYLT as primary source")
-    else:
-        uslt_lang = data.uslt_lang or "eng"
-        lang_2letter = lang_3to2(uslt_lang)
-        lrc_content = data.uslt_text.strip() + "\n"
-        print(f"  Found USLT: plain lyrics (lang: {uslt_lang} -> {lang_2letter})")
+    data = read_lyrics(mp3_path)
 
-    out = output_path(mp3_path, lang_2letter, args.output)
-    print(f"  Output: {out}")
+    extract = {"timed": _extract_timed, "plain": _extract_plain}.get(args.kind, _extract_auto)
+    lrc_content, lang_2letter = extract(data)
 
-    if out.exists():
-        print("  WARNING: Output file already exists, will overwrite")
-
-    if args.dry_run:
-        print(f"  [DRY RUN] Would write {len(lrc_content)} bytes to {out}")
-        return
-
-    out.write_text(lrc_content, encoding="utf-8")
-    print(f"  Written: {out} ({len(lrc_content)} bytes, {lrc_content.count('\n')} lines)")
+    out = _resolve_output(mp3_path, lang_2letter, args.output)
+    _write_lrc(out, lrc_content, args.dry_run)
 
 
 if __name__ == "__main__":

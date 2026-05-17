@@ -13,6 +13,9 @@ _COUNTRY_TO_LANG = json.loads((BASE / "data" / "language_codes.json").read_text(
 _LANG_TO_COUNTRY = {v: k for k, v in _COUNTRY_TO_LANG.items()}
 
 
+FALLBACK_LANG3 = "eng"
+
+
 def lang_3to2(lang3: str) -> str:
     """Convert 3-letter ISO 639-2/B to 2-letter ISO 639-1. Fallback to original."""
     return _LANG_TO_COUNTRY.get(lang3.lower(), lang3)
