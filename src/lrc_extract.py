@@ -4,41 +4,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from mutagen.id3 import ID3, ID3NoHeaderError
-
+from utils.id3 import LyricsData, read_lyrics
 from utils.language import lang_3to2
 from utils.parsing import sylt_to_lrc
 from utils.timestamps import format_timestamp
-
-
-def extract_lyrics(mp3_path: Path) -> dict:
-    result = {
-        "has_sylt": False,
-        "has_uslt": False,
-        "sylt_entries": None,
-        "sylt_lang": None,
-        "uslt_text": None,
-        "uslt_lang": None,
-    }
-
-    try:
-        audio = ID3(mp3_path)
-    except ID3NoHeaderError:
-        return result
-
-    sylt = audio.getall("SYLT")
-    if sylt:
-        result["has_sylt"] = True
-        result["sylt_entries"] = sylt[0].text
-        result["sylt_lang"] = sylt[0].lang
-
-    uslt = audio.getall("USLT")
-    if uslt:
-        result["has_uslt"] = True
-        result["uslt_text"] = uslt[0].text
-        result["uslt_lang"] = uslt[0].lang
-
-    return result
 
 
 def output_path(mp3_path: Path, lang_2letter: str, output_arg: str | None) -> Path:
@@ -81,27 +50,27 @@ def main() -> None:
         print(f"Error: Not an MP3 file: {mp3_path}")
         sys.exit(1)
 
-    data = extract_lyrics(mp3_path)
+    data = read_lyrics(mp3_path)
 
-    if not data["has_sylt"] and not data["has_uslt"]:
+    if not data.has_sylt and not data.has_uslt:
         print("No embedded lyrics found (no SYLT or USLT frames).")
         sys.exit(1)
 
     print(mp3_path)
 
-    if data["has_sylt"]:
-        sylt_lang = data["sylt_lang"] or "eng"
+    if data.has_sylt:
+        sylt_lang = data.sylt_lang or "eng"
         lang_2letter = lang_3to2(sylt_lang)
-        lrc_content = sylt_to_lrc(data["sylt_entries"])
+        lrc_content = sylt_to_lrc(data.sylt_entries)
         print(
-            f"  Found SYLT: {len(data['sylt_entries'])} timed entries (lang: {sylt_lang} -> {lang_2letter})"
+            f"  Found SYLT: {len(data.sylt_entries)} timed entries (lang: {sylt_lang} -> {lang_2letter})"
         )
-        if data["has_uslt"]:
-            print(f"  Also has USLT (lang: {data['uslt_lang']}) - using SYLT as primary source")
+        if data.has_uslt:
+            print(f"  Also has USLT (lang: {data.uslt_lang}) - using SYLT as primary source")
     else:
-        uslt_lang = data["uslt_lang"] or "eng"
+        uslt_lang = data.uslt_lang or "eng"
         lang_2letter = lang_3to2(uslt_lang)
-        lrc_content = data["uslt_text"].strip() + "\n"
+        lrc_content = data.uslt_text.strip() + "\n"
         print(f"  Found USLT: plain lyrics (lang: {uslt_lang} -> {lang_2letter})")
 
     out = output_path(mp3_path, lang_2letter, args.output)

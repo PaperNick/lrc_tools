@@ -10,10 +10,16 @@ def main() -> None:
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
 
+    import lrc_read
     import lrc_embed
     import lrc_extract
     import lrc_clean
     import lrc_type
+
+    read_p = subparsers.add_parser(
+        "read", help="Read embedded lyrics (SYLT/USLT) from MP3 to stdout"
+    )
+    lrc_read.build_parser(read_p)
 
     embed_p = subparsers.add_parser("embed", help="Embed LRC lyrics into MP3 as SYLT + USLT frames")
     lrc_embed.build_parser(embed_p)
@@ -43,6 +49,7 @@ def main() -> None:
     sys.argv = [sys.argv[0]] + sys.argv[2:]
 
     dispatch = {
+        "read": lrc_read.main,
         "embed": lrc_embed.main,
         "extract": lrc_extract.main,
         "clean": lrc_clean.main,

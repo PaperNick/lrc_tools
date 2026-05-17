@@ -1,6 +1,6 @@
 # lrc-tools
 
-Unified CLI for embedding, extracting, cleaning, and inspecting LRC lyrics in MP3 files.
+Unified CLI for reading, embedding, extracting, cleaning, and inspecting LRC lyrics in MP3 files.
 
 
 ## Requirements
@@ -57,11 +57,41 @@ Replace `lrc_tools` with `python3 src/lrc_tools.py` if running from source.
 lrc_tools --help
 
 # Get help for a specific subcommand
+lrc_tools read --help
 lrc_tools embed --help
 lrc_tools extract --help
 lrc_tools clean --help
 lrc_tools type --help
 ```
+
+---
+
+### read
+
+Read embedded lyrics from an MP3 directly to stdout. Ideal for piping into other tools.
+
+```shell
+# Print summary of available lyrics (to stderr)
+lrc_tools read song.mp3
+
+# Output timed lyrics (SYLT) as LRC format
+lrc_tools read song.mp3 timed
+
+# Output plain lyrics (USLT) as plain text
+lrc_tools read song.mp3 plain
+
+# Include language code header on the first line
+lrc_tools read song.mp3 timed --include-lang
+lrc_tools read song.mp3 plain --include-lang
+
+# Pipe
+lrc_tools read song.mp3 timed | grep "love"
+```
+
+When no `kind` is specified, a summary is printed to stderr showing which lyric types are available.
+
+The `--include-lang` flag prepends a `Language: xx` header line using the resolved
+2-letter ISO 639-1 code (e.g. `Language: ja` for Japanese, `Language: en` for English).
 
 ---
 
