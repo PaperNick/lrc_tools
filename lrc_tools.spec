@@ -17,7 +17,7 @@ a = Analysis(
         'lrc_embed',
         'lrc_extract',
         'lrc_clean',
-        'lrc_type',
+        'lrc_inspect',
         'language',
         'mutagen',
         'mutagen.id3',

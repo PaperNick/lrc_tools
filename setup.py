@@ -19,7 +19,7 @@ setup(
             "lrc_tools-embed=lrc_embed:main",
             "lrc_tools-extract=lrc_extract:main",
             "lrc_tools-clean=lrc_clean:main",
-            "lrc_tools-type=lrc_type:main",
+            "lrc_tools-type=lrc_inspect:main",
         ],
     },
     classifiers=[

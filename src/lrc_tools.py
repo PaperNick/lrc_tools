@@ -14,7 +14,7 @@ def main() -> None:
     import lrc_embed
     import lrc_extract
     import lrc_clean
-    import lrc_type
+    import lrc_inspect
 
     read_p = subparsers.add_parser(
         "read", help="Read embedded lyrics (SYLT/USLT) from MP3 to stdout"
@@ -35,9 +35,9 @@ def main() -> None:
     lrc_clean.build_parser(clean_p)
 
     type_p = subparsers.add_parser(
-        "type", help="Identify type of MP3 file (lyrics tags) and LRC file (timed/plain)"
+        "inspect", help="Identify type of MP3 file (lyrics tags) and LRC file (timed/plain)"
     )
-    lrc_type.build_parser(type_p)
+    lrc_inspect.build_parser(type_p)
 
     args = parser.parse_args()
 
@@ -53,7 +53,7 @@ def main() -> None:
         "embed": lrc_embed.main,
         "extract": lrc_extract.main,
         "clean": lrc_clean.main,
-        "type": lrc_type.main,
+        "inspect": lrc_inspect.main,
     }
     dispatch[args.command]()
 

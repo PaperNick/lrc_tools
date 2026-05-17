@@ -61,7 +61,7 @@ lrc_tools read --help
 lrc_tools embed --help
 lrc_tools extract --help
 lrc_tools clean --help
-lrc_tools type --help
+lrc_tools inspect --help
 ```
 
 ---
@@ -169,20 +169,20 @@ Confirms before modifying by default. Use `--yes` or `-y` to skip.
 
 ---
 
-### type
+### inspect
 
 Inspect an MP3 or LRC file and print its type classification.
 
 ```shell
 # Check an MP3
-lrc_tools type song.mp3
+lrc_tools inspect song.mp3
 # → SYLT+USLT: song.mp3
 # → SYLT_ONLY: song.mp3
 # → USLT_ONLY: song.mp3
 # → NO_LYRICS: song.mp3
 
 # Check an LRC file
-lrc_tools type lyrics.lrc
+lrc_tools inspect lyrics.lrc
 # → TIMED: lyrics.lrc
 # → PLAIN: lyrics.lrc
 # → EMPTY: lyrics.lrc
