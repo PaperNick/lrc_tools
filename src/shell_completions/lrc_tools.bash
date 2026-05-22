@@ -98,7 +98,7 @@ _lrc_tools_read()
 
   local num_args=$((cword - 2))
   if [[ $num_args -eq 0 ]]; then
-    _filedir
+    _filedir "mp3"
   elif [[ $num_args -eq 1 ]]; then
     mapfile -t COMPREPLY < <(compgen -W "timed plain" -- "$cur")
   fi
@@ -224,7 +224,8 @@ _lrc_tools_inspect()
   local cur prev words cword
   _init_completion || return
 
-  _filedir
+  _filedir "mp3"
+  _filedir "lrc"
 }
 
 # ---------------------------------------------------------------------------
