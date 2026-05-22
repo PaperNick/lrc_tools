@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 
 import argparse
+import io
 import sys
 from pathlib import Path
+
+
+def _reconfigure_stdout() -> None:
+    """Wrap stdout and use UTF-8 to bypass Windows encoding issues."""
+    if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+        sys.stdout = io.TextIOWrapper(
+            sys.stdout.buffer,
+            encoding="utf-8",
+            errors="replace",
+            line_buffering=True,
+        )
 
 
 def _completions_main() -> None:
@@ -16,6 +28,8 @@ def _completions_main() -> None:
 
 
 def main() -> None:
+    _reconfigure_stdout()
+
     parser = argparse.ArgumentParser(
         description="LRC Tools - unified CLI for LRC lyrics and MP3 files",
     )
