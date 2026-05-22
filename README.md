@@ -1,4 +1,4 @@
-# lrc-tools
+# lrc_tools
 
 Unified CLI for reading, embedding, extracting, cleaning, and inspecting LRC lyrics in MP3 files.
 
@@ -194,3 +194,42 @@ lrc_tools inspect lyrics.lrc
 # PLAIN: lyrics.lrc
 # EMPTY: lyrics.lrc
 ```
+
+
+## Bash completion
+
+A bash completion script is available by calling `lrc_tools completions`. It provides tab-completion for subcommands, flags (both short and long) and positional arguments like `.mp3` and `.lrc` files.
+
+### Requirements
+
+Make sure the `bash-completion` package is installed:
+
+```shell
+# Debian-based
+sudo apt install bash-completion
+
+# Fedora
+sudo dnf install bash-completion
+
+# Arch
+sudo pacman -S bash-completion
+
+# macOS (Homebrew)
+brew install bash-completion
+```
+
+### Local install (per-user)
+
+```shell
+COMPLETION_DIR="$HOME/.local/share/bash-completion/completions"
+mkdir -p "$COMPLETION_DIR"
+lrc_tools completions > "$COMPLETION_DIR/lrc_tools"
+```
+
+### Global install (system-wide)
+
+```shell
+lrc_tools completions | sudo tee /usr/share/bash-completion/completions/lrc_tools
+```
+
+Restart your shell to activate

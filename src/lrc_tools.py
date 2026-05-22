@@ -2,6 +2,17 @@
 
 import argparse
 import sys
+from pathlib import Path
+
+
+def _completions_main() -> None:
+    if getattr(sys, "frozen", False):
+        base = Path(sys._MEIPASS)
+    else:
+        base = Path(__file__).resolve().parent
+
+    bash_completion = base / "shell_completions" / "lrc_tools.bash"
+    sys.stdout.write(bash_completion.read_text())
 
 
 def main() -> None:
@@ -39,11 +50,19 @@ def main() -> None:
     )
     lrc_inspect.build_parser(type_p)
 
+    completions_p = subparsers.add_parser(
+        "completions", help="Output bash completion script to stdout"
+    )
+
     args = parser.parse_args()
 
     if not args.command:
         parser.print_help()
         exit(1)
+
+    if args.command == "completions":
+        _completions_main()
+        return
 
     # Replace sys.argv so submodule main() works (strip command name)
     sys.argv = [sys.argv[0]] + sys.argv[2:]

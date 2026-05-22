@@ -12,6 +12,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('src/data/language_codes.json', 'data'),
+        ('src/shell_completions/lrc_tools.bash', 'shell_completions'),
     ],
     hiddenimports=[
         'lrc_embed',
