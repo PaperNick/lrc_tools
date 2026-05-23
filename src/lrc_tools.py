@@ -23,8 +23,15 @@ def _completions_main() -> None:
     else:
         base = Path(__file__).resolve().parent
 
-    bash_completion = base / "shell_completions" / "lrc_tools.bash"
-    sys.stdout.write(bash_completion.read_text())
+    bash_completion = (base / "shell_completions" / "lrc_tools.bash").read_text()
+
+    # Use the actual binary name when loading bash completions
+    prog_name = Path(sys.argv[0]).name
+    bash_completion = bash_completion.replace(
+        "complete -F _lrc_tools lrc_tools",
+        f"complete -F _lrc_tools {prog_name}",
+    )
+    print(bash_completion)
 
 
 def main() -> None:
@@ -72,7 +79,7 @@ def main() -> None:
 
     if not args.command:
         parser.print_help()
-        exit(1)
+        sys.exit(1)
 
     if args.command == "completions":
         _completions_main()

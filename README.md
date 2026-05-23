@@ -233,3 +233,11 @@ lrc_tools completions | sudo tee /usr/share/bash-completion/completions/lrc_tool
 ```
 
 Restart your shell to activate
+
+> [!NOTE]
+> If you rename the binary, the bash completion filename must match it.
+>
+> ```shell
+> mv lrc_tools my-lyric-tool
+> my-lyric-tool completions > "$COMPLETION_DIR/my-lyric-tool"
+> ```
