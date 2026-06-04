@@ -7,15 +7,9 @@ from pathlib import Path
 
 from mutagen.id3 import ID3, ID3NoHeaderError
 
-# LRC classification results
+TIMED_PLUS_PLAIN = "TIMED+PLAIN"
 TIMED = "TIMED"
 PLAIN = "PLAIN"
-EMPTY = "EMPTY"
-
-# MP3 classification results
-SYLT_PLUS_USLT = "SYLT+USLT"
-SYLT = "SYLT"
-USLT = "USLT"
 NO_LYRICS = "NO_LYRICS"
 
 ERROR = "ERROR"
@@ -41,7 +35,7 @@ def classify_lrc(lrc_path: Path) -> str:
             return TIMED
         return PLAIN
 
-    return EMPTY
+    return NO_LYRICS
 
 
 def classify_mp3(mp3_path: Path) -> str:
@@ -57,11 +51,11 @@ def classify_mp3(mp3_path: Path) -> str:
     has_uslt = len(audio.getall("USLT")) > 0
 
     if has_sylt and has_uslt:
-        return SYLT_PLUS_USLT
+        return TIMED_PLUS_PLAIN
     if has_sylt:
-        return SYLT
+        return TIMED
     if has_uslt:
-        return USLT
+        return PLAIN
     return NO_LYRICS
 
 

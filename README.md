@@ -64,7 +64,7 @@ lrc_tools inspect --help
 
 ### read
 
-Read embedded lyrics from an MP3 directly to stdout. Ideal for piping into other tools.
+Read embedded lyrics from an MP3 directly to stdout.
 
 ```shell
 # Print summary of available lyrics (to stderr)
@@ -81,7 +81,7 @@ lrc_tools read song.mp3 timed --include-lang
 lrc_tools read song.mp3 plain --include-lang
 
 # Pipe
-lrc_tools read song.mp3 timed | grep "love"
+lrc_tools read song.mp3 plain | grep "love"
 ```
 
 When no `kind` is specified, a summary is printed to stderr showing which lyric types are available.
@@ -125,7 +125,7 @@ If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g
 
 ### extract
 
-Extract embedded SYLT/USLT lyrics from an MP3 to an LRC file.
+Extract embedded timed/plain (SYLT/USLT) lyrics from an MP3 to an LRC file.
 
 ```shell
 # Extract to auto-named file (e.g. song.en.lrc)
@@ -144,8 +144,7 @@ lrc_tools extract song.mp3 --dry-run
 
 Output is named `{stem}.{lang_2letter}.lrc` by default (e.g. `song.en.lrc`).
 
-When no `kind` is specified, SYLT is preferred over USLT when both are present.
-Use `timed` or `plain` to extract a specific type only.
+When no `kind` is specified, timed (SYLT) is preferred over plain (USLT) when both are present. Use `timed` or `plain` to extract a specific type only.
 
 ---
 
@@ -180,9 +179,9 @@ Check an MP3 file:
 
 ```shell
 lrc_tools inspect song.mp3
-# SYLT+USLT: song.mp3
-# SYLT: song.mp3
-# USLT: song.mp3
+# TIMED+PLAIN: song.mp3
+# TIMED: song.mp3
+# PLAIN: song.mp3
 # NO_LYRICS: song.mp3
 ```
 
@@ -192,7 +191,7 @@ Check an LRC file:
 lrc_tools inspect lyrics.lrc
 # TIMED: lyrics.lrc
 # PLAIN: lyrics.lrc
-# EMPTY: lyrics.lrc
+# NO_LYRICS: lyrics.lrc
 ```
 
 
