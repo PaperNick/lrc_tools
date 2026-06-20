@@ -63,6 +63,7 @@ def _write_lrc(out: Path, content: str, dry_run: bool) -> None:
         print(f"  [DRY RUN] Would write {len(content)} bytes to {out}")
         return
 
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(content, encoding="utf-8")
     print(f"  Written: {out} ({len(content)} bytes, {content.count('\n')} lines)")
 

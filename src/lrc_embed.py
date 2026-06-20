@@ -71,6 +71,7 @@ def copy_mp3(src: Path, dst: Path, dry_run: bool) -> str | None:
     if dry_run:
         return None
     try:
+        dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, dst)
         return None
     except Exception as e:
