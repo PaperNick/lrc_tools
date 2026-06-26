@@ -1,5 +1,7 @@
 # lrc_tools
 
+[![Test Status](https://github.com/PaperNick/lrc_tools/actions/workflows/tests.yml/badge.svg)](https://github.com/PaperNick/lrc_tools/actions)
+
 Unified CLI for reading, embedding, extracting, cleaning, and inspecting LRC lyrics in MP3 files.
 
 
