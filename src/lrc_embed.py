@@ -50,9 +50,11 @@ def has_frame(mp3_path: Path, frame_id: str) -> bool:
 
 
 def find_matching_lrc(mp3_path: Path) -> Path | None:
-    """Auto-discover an LRC file by globbing {stem}*.lrc."""
-    matches = sorted(mp3_path.parent.glob(f"{mp3_path.stem}*.lrc"))
-    return matches[0] if matches else None
+    """Auto-discover an LRC file by matching {stem}*.lrc."""
+    for file in mp3_path.parent.iterdir():
+        if file.stem.startswith(mp3_path.stem) and file.suffix.lower() == ".lrc":
+            return file
+    return None
 
 
 def resolve_target(mp3_path: Path, output_arg: str | None, in_place: bool) -> Path:
