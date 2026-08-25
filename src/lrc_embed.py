@@ -10,25 +10,36 @@ from typing import List, Tuple
 from mutagen.id3 import ID3, SYLT, USLT, Encoding, ID3NoHeaderError
 from mutagen.mp3 import MP3
 
-from utils.language import lang_2to3, FALLBACK_LANG3
+from utils.language import lang_2to3, is_valid_lang, FALLBACK_LANG3
 from utils.parsing import parse_lrc_timestamps
 from utils.timestamps import lrc_has_timestamps, strip_timestamps
 
 
 def detect_lang_from_filename(lrc_path: Path) -> str | None:
-    """Detect 2-letter code from filename like 'Song.ja.lrc' -> 'jpn'."""
+    """Return a raw language code extracted from the filename suffix.
+    Matches 'Song.ja.lrc' -> 'ja' and 'Song.jpn.lrc' -> 'jpn'.
+    """
     stem = lrc_path.stem
-    match = re.search(r"\.([a-z]{2})$", stem, re.IGNORECASE)
-    if match:
-        return lang_2to3(match.group(1).lower())
-    return None
+    match = re.search(r"\.([a-z]{2,3})$", stem, re.IGNORECASE)
+    if not match:
+        return None
+    return match.group(1).lower()
 
 
 def resolve_lang(cli_lang: str | None, lrc_path: Path) -> str:
-    """Resolve language: --lang flag, filename detection."""
-    if cli_lang:
-        return cli_lang
-    return detect_lang_from_filename(lrc_path) or FALLBACK_LANG3
+    """Return a 3-letter ISO 639-2 lang code, or fallback to 'eng'.
+    Accepts 2-letter (ISO 639-1) and 3-letter (ISO 639-2) codes.
+    """
+    code = cli_lang or detect_lang_from_filename(lrc_path)
+    if not code:
+        return FALLBACK_LANG3
+
+    lang = code.strip().lower()
+    if not is_valid_lang(lang):
+        return FALLBACK_LANG3
+    if len(lang) == 2:
+        return lang_2to3(lang) or FALLBACK_LANG3
+    return lang
 
 
 def open_or_create_id3(mp3_path: Path):
@@ -128,32 +139,34 @@ def embed_uslt(target: Path, plain_text: str, lang: str, dry_run: bool) -> Tuple
         return False, f"mutagen error: {e}"
 
 
-def _embed_sylt_or_skip(target: Path, lrc_path: Path, lang: str, dry_run: bool, skip: bool) -> None:
-    """Embed SYLT if requested, report skip or failure."""
+def _embed_sylt_or_skip(target: Path, lrc_path: Path, lang: str, dry_run: bool, skip: bool) -> bool:
+    """Embed SYLT if requested, report skip or failure. Returns True on success."""
     if skip:
         print("  SYLT: SKIPPED - Already present in MP3")
-        return
+        return True
 
     ok, msg = embed_sylt(target, lrc_path, lang, dry_run)
     print(f"  SYLT: {'OK' if ok else 'FAIL'} - {msg}")
+    return ok
 
 
 def _embed_uslt_or_skip(
     target: Path, lrc_path: Path, lang: str, dry_run: bool, skip: bool, lrc_timed: bool
-) -> None:
-    """Embed USLT if requested, report skip or failure."""
+) -> bool:
+    """Embed USLT if requested, report skip or failure. Returns True on success."""
     if skip:
         print("  USLT: SKIPPED - Already present in MP3")
-        return
+        return True
 
     lrc_content = lrc_path.read_text(encoding="utf-8")
     plain_text = strip_timestamps(lrc_content) if lrc_timed else lrc_content.strip()
     if not plain_text.strip():
         print("  USLT: FAIL - No lyrics text found")
-        return
+        return False
 
     ok, msg = embed_uslt(target, plain_text, lang, dry_run)
     print(f"  USLT: {'OK' if ok else 'FAIL'} - {msg}")
+    return ok
 
 
 def build_parser(subparser) -> None:
@@ -163,7 +176,7 @@ def build_parser(subparser) -> None:
     )
     subparser.add_argument(
         "--lang",
-        help=f"3-letter ISO 639-2 language code (auto-detected from filename, fallback '{FALLBACK_LANG3}')",
+        help=f"2-letter ISO 639-1 or 3-letter ISO 639-2 language code (auto-detected from filename, fallback '{FALLBACK_LANG3}')",
     )
     subparser.add_argument(
         "--no-timed", action="store_true", help="Skip embedding timed lyrics (SYLT)"
@@ -254,12 +267,16 @@ def main() -> None:
         sys.exit(1)
 
     if do_sylt:
-        _embed_sylt_or_skip(target, lrc_path, lang, args.dry_run, skip_sylt)
+        is_embed_successful = _embed_sylt_or_skip(target, lrc_path, lang, args.dry_run, skip_sylt)
+        if not is_embed_successful:
+            sys.exit(1)
     else:
         print("  SYLT: SKIPPED - Not requested or LRC has no timestamps")
 
     if do_uslt:
-        _embed_uslt_or_skip(target, lrc_path, lang, args.dry_run, skip_uslt, lrc_timed)
+        is_embed_successful = _embed_uslt_or_skip(target, lrc_path, lang, args.dry_run, skip_uslt, lrc_timed)
+        if not is_embed_successful:
+            sys.exit(1)
     else:
         print("  USLT: SKIPPED - Not requested")
 

@@ -104,7 +104,8 @@ lrc_tools embed song.mp3
 # Specify LRC file explicitly
 lrc_tools embed song.mp3 lyrics.lrc
 
-# Override language (3-letter ISO 639-2 code)
+# Override language (2-letter ISO 639-1 or 3-letter ISO 639-2 code)
+lrc_tools embed song.mp3 --lang ko
 lrc_tools embed song.mp3 --lang kor
 
 # Modify original MP3 instead of creating a copy
@@ -121,7 +122,7 @@ lrc_tools embed song.mp3 --no-plain
 lrc_tools embed song.mp3 --dry-run
 ```
 
-If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g. `song.ko.lrc` for `song.mp3`). Language is auto-detected from the filename suffix (e.g. `.ko.lrc` -> `kor`), and defaults to `eng`.
+If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g. `song.ko.lrc` for `song.mp3`). Language is auto-detected from the filename suffix using a 2-letter or 3-letter code (e.g. `.ko.lrc` -> `kor`, `.kor.lrc` -> `kor`), and defaults to `eng`. Same resolution rules apply for the `--lang` flag.
 
 ---
 

@@ -144,6 +144,26 @@ class TestEmbed:
         assert "Language: kor" in result.stdout
         assert "Language: ko" in run("read", str(mp3), "plain", "--include-lang").stdout
 
+    def test_two_letter_lang_resolved(self):
+        mp3 = clean_mp3()
+        result = embed_inplace(mp3, PLAIN_LRC, "--lang", "ja")
+        assert "Language: jpn" in result.stdout
+        assert "USLT: OK" in result.stdout
+        assert "Language: ja" in run("read", str(mp3), "plain", "--include-lang").stdout
+
+    def test_three_letter_lang_preserved(self):
+        mp3 = clean_mp3()
+        result = embed_inplace(mp3, PLAIN_LRC, "--lang", "jpn")
+        assert "Language: jpn" in result.stdout
+        assert "USLT: OK" in result.stdout
+        assert "Language: ja" in run("read", str(mp3), "plain", "--include-lang").stdout
+
+    def test_invalid_lang_falls_back(self):
+        mp3 = clean_mp3()
+        result = embed_inplace(mp3, PLAIN_LRC, "--lang", "zzz")
+        assert "Language: eng" in result.stdout
+        assert "USLT: OK" in result.stdout
+
     def test_no_timed_flag(self):
         mp3 = clean_mp3()
         result = embed_inplace(mp3, TIMED_LRC, "--no-timed")

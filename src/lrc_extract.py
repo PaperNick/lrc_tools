@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Tuple
 
 from utils.id3 import LyricsData, read_lyrics
-from utils.language import lang_3to2, FALLBACK_LANG3
+from utils.language import lang_3to2, FALLBACK_LANG2, FALLBACK_LANG3
 from utils.parsing import sylt_to_lrc
 
 
@@ -16,7 +16,8 @@ def _extract_timed(data: LyricsData) -> Tuple[str, str]:
         print("  No timed lyrics (SYLT) found.")
         sys.exit(1)
 
-    lang_2letter = lang_3to2(data.sylt_lang or FALLBACK_LANG3)
+    lang3 = data.sylt_lang or FALLBACK_LANG3
+    lang_2letter = lang_3to2(lang3) or FALLBACK_LANG2
     count = len(data.sylt_entries)
     print(f"  Found SYLT: {count} timed entries (lang: {data.sylt_lang} -> {lang_2letter})")
     return sylt_to_lrc(data.sylt_entries), lang_2letter
@@ -28,7 +29,8 @@ def _extract_plain(data: LyricsData) -> Tuple[str, str]:
         print("  No plain lyrics (USLT) found.")
         sys.exit(1)
 
-    lang_2letter = lang_3to2(data.uslt_lang or FALLBACK_LANG3)
+    lang3 = data.uslt_lang or FALLBACK_LANG3
+    lang_2letter = lang_3to2(lang3) or FALLBACK_LANG2
     print(f"  Found USLT: plain lyrics (lang: {data.uslt_lang} -> {lang_2letter})")
     return data.uslt_text.strip() + "\n", lang_2letter
 

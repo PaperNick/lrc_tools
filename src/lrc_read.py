@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from utils.id3 import LyricsData, read_lyrics
-from utils.language import lang_3to2, FALLBACK_LANG3
+from utils.language import lang_3to2, FALLBACK_LANG2, FALLBACK_LANG3
 from utils.parsing import sylt_to_lrc
 from utils.timestamps import format_timestamp
 
@@ -30,7 +30,7 @@ def validate_args(args, parser) -> Path:
 def _language_header(lang_code: str | None) -> str:
     """Resolve language code into a 'Language: xx' header line."""
     lang = lang_code or FALLBACK_LANG3
-    return f"Language: {lang_3to2(lang)}"
+    return f"Language: {lang_3to2(lang) or FALLBACK_LANG2}"
 
 
 def output_timed(data: LyricsData, include_lang: bool) -> None:
@@ -67,7 +67,7 @@ def print_summary(mp3_path: Path, data: LyricsData) -> None:
 
     if data.has_sylt:
         sylt_lang = data.sylt_lang or FALLBACK_LANG3
-        lang_2letter = lang_3to2(sylt_lang)
+        lang_2letter = lang_3to2(sylt_lang) or FALLBACK_LANG2
         count = len(data.sylt_entries)
         print(
             f"  SYLT (timed, {count} entries, lang: {sylt_lang} -> {lang_2letter})",
@@ -76,7 +76,7 @@ def print_summary(mp3_path: Path, data: LyricsData) -> None:
 
     if data.has_uslt:
         uslt_lang = data.uslt_lang or FALLBACK_LANG3
-        lang_2letter = lang_3to2(uslt_lang)
+        lang_2letter = lang_3to2(uslt_lang) or FALLBACK_LANG2
         text_len = len(data.uslt_text)
         print(
             f"  USLT (plain, {text_len} chars, lang: {uslt_lang} -> {lang_2letter})",
