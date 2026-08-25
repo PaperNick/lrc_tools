@@ -243,3 +243,13 @@ Restart your shell to activate
 > mv lrc_tools my-lyric-tool
 > my-lyric-tool completions > "$COMPLETION_DIR/my-lyric-tool"
 > ```
+
+
+## Tests
+
+The integration tests run against the compiled binary, so build it first:
+
+```shell
+pyinstaller lrc_tools.spec
+python -m pytest src/tests/integration.py -v
+```
