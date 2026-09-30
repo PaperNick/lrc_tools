@@ -12,9 +12,7 @@ def sylt_to_lrc(entries: List[Tuple[str, int]]) -> str:
     """Convert SYLT entries [(text, ms)] to LRC format string."""
     lines = []
     for text, time_ms in entries:
-        if time_ms == 0:
-            lines.append(text)
-        elif text:
+        if text:
             lines.append(f"{format_timestamp(time_ms)} {text}")
         else:
             lines.append(f"{format_timestamp(time_ms)} ")
@@ -22,7 +20,10 @@ def sylt_to_lrc(entries: List[Tuple[str, int]]) -> str:
 
 
 def parse_lrc_timestamps(lrc_content: str) -> List[Tuple[str, int]]:
-    """Parse LRC content into [(text, timestamp_ms)] tuples."""
+    """Parse LRC content into [(text, timestamp_ms)] tuples.
+
+    Untimed lines are skipped (their text is preserved in USLT instead).
+    """
     entries: List[Tuple[str, int]] = []
 
     for line in lrc_content.splitlines():
@@ -38,8 +39,6 @@ def parse_lrc_timestamps(lrc_content: str) -> List[Tuple[str, int]]:
             continue
 
         if not timestamps:
-            if text:
-                entries.append((text, 0))
             continue
 
         # Use last timestamp

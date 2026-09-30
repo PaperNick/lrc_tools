@@ -22,9 +22,11 @@ CLEAN_MP3 = FIXTURES / "test.mp3"
 PLAIN_LRC = FIXTURES / "plain.ja.lrc"
 TIMED_LRC = FIXTURES / "timed.ja.lrc"
 EMPTY_LRC = FIXTURES / "empty.en.lrc"
+ZERO_TIME_LRC = FIXTURES / "zero-time.en.lrc"
 
 PLAIN_LRC_CONTENT = PLAIN_LRC.read_text(encoding="utf-8")
 TIMED_LRC_CONTENT = TIMED_LRC.read_text(encoding="utf-8")
+ZERO_TIME_LRC_CONTENT = ZERO_TIME_LRC.read_text(encoding="utf-8")
 
 KNOWN_TYPES = {
     "plain": "PLAIN",
@@ -223,6 +225,15 @@ class TestExtract:
         expected = TIMED_LRC_CONTENT if kind == "timed" else PLAIN_LRC_CONTENT
         assert content.rstrip("\n") == expected.rstrip("\n")
 
+    def test_extract_preserves_zero_timestamp(self):
+        """A [00:00.00] line must keep its timestamp on round-trip."""
+        mp3 = clean_mp3()
+        embed_inplace(mp3, ZERO_TIME_LRC)
+        out = WORKDIR / "zero.lrc"
+        result = run("extract", str(mp3), "timed", "--output", str(out))
+        assert "Found SYLT" in result.stdout
+        assert out.read_text(encoding="utf-8").rstrip("\n") == ZERO_TIME_LRC_CONTENT.rstrip("\n")
+
     def test_auto_extract_prefers_sylt(self):
         mp3 = clean_mp3()
         embed_inplace(mp3, TIMED_LRC)
@@ -252,6 +263,12 @@ class TestRead:
         mp3 = clean_mp3()
         embed_inplace(mp3, TIMED_LRC)
         assert_lyric_content(run("read", str(mp3), "timed"), "timed")
+
+    def test_read_preserves_zero_timestamp(self):
+        mp3 = clean_mp3()
+        embed_inplace(mp3, ZERO_TIME_LRC)
+        result = run("read", str(mp3), "timed")
+        assert result.stdout.rstrip("\n") == ZERO_TIME_LRC_CONTENT.rstrip("\n")
 
     def test_read_plain_matches_fixture(self):
         mp3 = clean_mp3()
