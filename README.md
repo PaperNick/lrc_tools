@@ -95,14 +95,15 @@ The `--include-lang` flag prepends a `Language: xx` header line using the resolv
 
 ### embed
 
-Embed LRC lyrics into an MP3 as SYLT (synchronized) and/or USLT (unsynchronized) frames.
+Embed lyrics into an MP3 as SYLT (synchronized) and/or USLT (unsynchronized) frames.
 
 ```shell
-# Embed with auto-discovered LRC file
+# Embed with auto-discovered lyrics file
 lrc_tools embed song.mp3
 
-# Specify LRC file explicitly
+# Specify lyrics file explicitly
 lrc_tools embed song.mp3 lyrics.lrc
+lrc_tools embed song.mp3 lyrics.txt
 
 # Override language (2-letter ISO 639-1 or 3-letter ISO 639-2 code)
 lrc_tools embed song.mp3 --lang ko
@@ -122,7 +123,7 @@ lrc_tools embed song.mp3 --no-plain
 lrc_tools embed song.mp3 --dry-run
 ```
 
-If no LRC file is provided, it auto-discovers one by globbing `{stem}*.lrc` (e.g. `song.ko.lrc` for `song.mp3`). Language is auto-detected from the filename suffix using a 2-letter or 3-letter code (e.g. `.ko.lrc` -> `kor`, `.kor.lrc` -> `kor`), and defaults to `eng`. Same resolution rules apply for the `--lang` flag.
+If no lyrics file is provided, it auto-discovers one by globbing `{stem}*.lrc` or `{stem}*.txt` (e.g. `song.ko.lrc` for `song.mp3`), preferring `.lrc` when both match. Timed vs plain is detected from the content, not the extension: a file containing `[mm:ss.xx]` timestamps is embedded as timed (SYLT) plus stripped plain (USLT), while a file with no timestamps is embedded as plain (USLT) only. Language is auto-detected from the filename suffix using a 2-letter or 3-letter code (e.g. `.ko.lrc` -> `kor`, `.kor.lrc` -> `kor`), and defaults to `eng`. Same resolution rules apply for the `--lang` flag.
 
 ---
 
@@ -200,7 +201,7 @@ lrc_tools inspect lyrics.lrc
 
 ## Bash completion
 
-A bash completion script is available by calling `lrc_tools completions`. It provides tab-completion for subcommands, flags (both short and long) and positional arguments like `.mp3` and `.lrc` files.
+A bash completion script is available by calling `lrc_tools completions`. It provides tab-completion for subcommands, flags (both short and long) and positional arguments like `.mp3`, `.lrc` and `.txt` files.
 
 ### Requirements
 

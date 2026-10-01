@@ -21,6 +21,8 @@ WORKDIR = TESTS / "tmp"
 CLEAN_MP3 = FIXTURES / "test.mp3"
 PLAIN_LRC = FIXTURES / "plain.ja.lrc"
 TIMED_LRC = FIXTURES / "timed.ja.lrc"
+PLAIN_TXT = FIXTURES / "plain.ja.txt"
+TIMED_TXT = FIXTURES / "timed.ja.txt"
 EMPTY_LRC = FIXTURES / "empty.en.lrc"
 ZERO_TIME_LRC = FIXTURES / "zero-time.en.lrc"
 
@@ -118,7 +120,9 @@ class TestEmbed:
         [
             (PLAIN_LRC, "plain", "USLT: OK", "plain"),
             (TIMED_LRC, "timed", "SYLT: OK", "timed_plus_plain"),
+            (PLAIN_TXT, "plain", "USLT: OK", "plain"),
         ],
+        ids=["plain-lrc", "timed-lrc", "plain-txt"],
     )
     def test_embed_and_verify(self, lrc, kind, frame_ok, expected_type):
         mp3 = clean_mp3()
@@ -198,6 +202,37 @@ class TestEmbed:
         result = run("embed", str(mp3))
         assert "Auto-discovered" in result.stdout
         assert "USLT: OK" in result.stdout
+
+    def test_auto_discover_txt(self):
+        mp3 = clean_mp3(name="test.ja.mp3")
+        txt = mp3.with_suffix(".ja.txt")
+        shutil.copy2(PLAIN_TXT, txt)
+        result = run("embed", str(mp3), "--in-place")
+        assert "Auto-discovered" in result.stdout
+        assert "USLT: OK" in result.stdout
+        assert_inspect_classification(mp3, KNOWN_TYPES["plain"])
+
+    def test_auto_discover_prefers_lrc_over_txt(self):
+        mp3 = clean_mp3(name="test.ja.mp3")
+        lrc = mp3.with_suffix(".ja.lrc")
+        txt = mp3.with_suffix(".ja.txt")
+        shutil.copy2(TIMED_LRC, lrc)
+        shutil.copy2(PLAIN_TXT, txt)
+        result = run("embed", str(mp3))
+        assert f"Auto-discovered lyrics: {lrc}" in result.stdout
+        assert "SYLT: OK" in result.stdout
+
+    def test_txt_with_timestamps_is_treated_as_timed(self):
+        """A .txt file is plain by default, but timestamps are auto-detected as timed."""
+        mp3 = clean_mp3()
+        result = embed_inplace(mp3, TIMED_TXT)
+        assert "Lyrics type: TIMED" in result.stdout
+        assert "SYLT: OK" in result.stdout
+        assert "USLT: OK" in result.stdout
+
+        assert_inspect_classification(mp3, KNOWN_TYPES["timed_plus_plain"])
+        assert_lyric_content(run("read", str(mp3), "timed"), "timed")
+        assert "[00:" not in run("read", str(mp3), "plain").stdout
 
 
 class TestExtract:
@@ -326,13 +361,21 @@ class TestErrorCases:
     def test_rejects_invalid_input(self, args):
         assert run(*args, check=False).returncode != 0
 
-    def test_embed_no_lrc_discovered(self):
+    def test_embed_no_lyrics_discovered(self):
         mp3 = clean_mp3()
         result = run("embed", str(mp3), check=False)
         assert result.returncode != 0
-        assert "No LRC file found" in (result.stdout or result.stderr)
+        assert "No lyrics file found" in (result.stdout or result.stderr)
 
     def test_embed_nonexistent_lrc(self):
         mp3 = clean_mp3()
         result = run("embed", str(mp3), str(WORKDIR / "nonexistent.lrc"), check=False)
         assert result.returncode != 0
+
+    def test_embed_rejects_unsupported_lyrics_extension(self):
+        mp3 = clean_mp3()
+        bad = WORKDIR / "lyrics.md"
+        bad.write_text("hello", encoding="utf-8")
+        result = run("embed", str(mp3), str(bad), check=False)
+        assert result.returncode != 0
+        assert "must be a .lrc or .txt file" in (result.stdout or result.stderr)

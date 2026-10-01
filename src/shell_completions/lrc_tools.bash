@@ -144,6 +144,7 @@ _lrc_tools_embed()
     _filedir "mp3"
   elif [[ $pos_count -eq 1 ]]; then
     _filedir "lrc"
+    _filedir "txt"
   fi
 }
 

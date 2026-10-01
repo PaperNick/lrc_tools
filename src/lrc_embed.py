@@ -14,6 +14,8 @@ from utils.language import lang_2to3, is_valid_lang, FALLBACK_LANG3
 from utils.parsing import parse_lrc_timestamps
 from utils.timestamps import lrc_has_timestamps, strip_timestamps
 
+SUPPORTED_LYRICS_SUFFIXES = (".lrc", ".txt")
+
 
 def detect_lang_from_filename(lrc_path: Path) -> str | None:
     """Return a raw language code extracted from the filename suffix.
@@ -60,12 +62,21 @@ def has_frame(mp3_path: Path, frame_id: str) -> bool:
         return False
 
 
-def find_matching_lrc(mp3_path: Path) -> Path | None:
-    """Auto-discover an LRC file by matching {stem}*.lrc."""
-    for file in mp3_path.parent.iterdir():
-        if file.stem.startswith(mp3_path.stem) and file.suffix.lower() == ".lrc":
-            return file
-    return None
+def find_matching_lyrics(mp3_path: Path) -> Path | None:
+    """Auto-discover a lyrics file by matching {stem}*.lrc or {stem}*.txt.
+
+    Prefers .lrc over .txt when both match.
+    """
+    candidates = [
+        file
+        for file in mp3_path.parent.iterdir()
+        if file.is_file()
+        and file.stem.startswith(mp3_path.stem)
+        and file.suffix.lower() in SUPPORTED_LYRICS_SUFFIXES
+    ]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda p: SUPPORTED_LYRICS_SUFFIXES.index(p.suffix.lower()))
 
 
 def resolve_target(mp3_path: Path, output_arg: str | None, in_place: bool) -> Path:
@@ -172,7 +183,9 @@ def _embed_uslt_or_skip(
 def build_parser(subparser) -> None:
     subparser.add_argument("mp3_file", help="MP3 file to embed lyrics into")
     subparser.add_argument(
-        "lrc_file", nargs="?", help="LRC lyrics file (auto-discovered if omitted)"
+        "lrc_file",
+        nargs="?",
+        help=(f"Lyrics file: {' or '.join(SUPPORTED_LYRICS_SUFFIXES)} (auto-discovered if omitted)"),
     )
     subparser.add_argument(
         "--lang",
@@ -202,7 +215,7 @@ def build_parser(subparser) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Embed LRC lyrics into MP3 as SYLT + USLT (Lyrics tag)",
+        description="Embed lyrics into an MP3 as SYLT + USLT (Lyrics tag)",
     )
     build_parser(parser)
     args = parser.parse_args()
@@ -228,17 +241,19 @@ def main() -> None:
     if args.lrc_file:
         lrc_path = Path(args.lrc_file)
         if not lrc_path.is_file():
-            print(f"  Error: LRC file not found: {lrc_path}")
+            print(f"  Error: Lyrics file not found: {lrc_path}")
             sys.exit(1)
-        if lrc_path.suffix.lower() != ".lrc":
-            print(f"  Error: Second argument must be an LRC file: {lrc_path}")
+        if lrc_path.suffix.lower() not in SUPPORTED_LYRICS_SUFFIXES:
+            suffix_list = " or ".join(SUPPORTED_LYRICS_SUFFIXES)
+            print(f"  Error: Second argument must be a {suffix_list} file: {lrc_path}")
             sys.exit(1)
     else:
-        lrc_path = find_matching_lrc(mp3_path)
+        lrc_path = find_matching_lyrics(mp3_path)
         if lrc_path is None:
-            print(f"  Error: No LRC file found matching '{mp3_path.stem}*.lrc'")
+            patterns = " or ".join(f"'{mp3_path.stem}*{suffix}'" for suffix in SUPPORTED_LYRICS_SUFFIXES)
+            print(f"  Error: No lyrics file found matching {patterns}")
             sys.exit(1)
-        print(f"  Auto-discovered LRC: {lrc_path}")
+        print(f"  Auto-discovered lyrics: {lrc_path}")
 
     lang = resolve_lang(args.lang, lrc_path)
     print(f"  Language: {lang}")
@@ -247,8 +262,9 @@ def main() -> None:
     label = " (in-place)" if target == mp3_path else ""
     print(f"  Output: {target}{label}")
 
+    # Timed vs plain is detected from the content, not the file extension
     lrc_timed = lrc_has_timestamps(lrc_path)
-    print(f"  LRC type: {'TIMED' if lrc_timed else 'PLAIN'}")
+    print(f"  Lyrics type: {'TIMED' if lrc_timed else 'PLAIN'}")
 
     do_sylt = not args.no_timed and lrc_timed
     do_uslt = not args.no_plain
@@ -271,7 +287,7 @@ def main() -> None:
         if not is_embed_successful:
             sys.exit(1)
     else:
-        print("  SYLT: SKIPPED - Not requested or LRC has no timestamps")
+        print("  SYLT: SKIPPED - Not requested or lyrics file has no timestamps")
 
     if do_uslt:
         is_embed_successful = _embed_uslt_or_skip(target, lrc_path, lang, args.dry_run, skip_uslt, lrc_timed)
