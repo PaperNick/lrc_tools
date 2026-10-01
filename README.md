@@ -254,3 +254,22 @@ The integration tests run against the compiled binary, so build it first:
 pyinstaller lrc_tools.spec
 python -m pytest src/tests/integration.py -v
 ```
+
+
+## Formatting
+
+Code is formatted with [Black](https://black.readthedocs.io/) using the settings in `pyproject.toml`.
+
+```shell
+pip install black
+```
+
+Format the source tree, or check it without modifying files:
+
+```shell
+# Format and update files
+black src
+
+# Check formatting only (no file writes)
+black --check src
+```

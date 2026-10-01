@@ -191,15 +191,9 @@ def build_parser(subparser) -> None:
         "--lang",
         help=f"2-letter ISO 639-1 or 3-letter ISO 639-2 language code (auto-detected from filename, fallback '{FALLBACK_LANG3}')",
     )
-    subparser.add_argument(
-        "--no-timed", action="store_true", help="Skip embedding timed lyrics (SYLT)"
-    )
-    subparser.add_argument(
-        "--no-plain", action="store_true", help="Skip embedding plain lyrics (USLT)"
-    )
-    subparser.add_argument(
-        "--output", "-o", help='Output file path (default: "source (lyrics).mp3")'
-    )
+    subparser.add_argument("--no-timed", action="store_true", help="Skip embedding timed lyrics (SYLT)")
+    subparser.add_argument("--no-plain", action="store_true", help="Skip embedding plain lyrics (USLT)")
+    subparser.add_argument("--output", "-o", help='Output file path (default: "source (lyrics).mp3")')
     subparser.add_argument(
         "--in-place",
         action="store_true",

@@ -48,9 +48,7 @@ def main() -> None:
     import lrc_clean
     import lrc_inspect
 
-    read_p = subparsers.add_parser(
-        "read", help="Read embedded lyrics (SYLT/USLT) from MP3 to stdout"
-    )
+    read_p = subparsers.add_parser("read", help="Read embedded lyrics (SYLT/USLT) from MP3 to stdout")
     lrc_read.build_parser(read_p)
 
     embed_p = subparsers.add_parser("embed", help="Embed LRC lyrics into MP3 as SYLT + USLT frames")
@@ -61,9 +59,7 @@ def main() -> None:
     )
     lrc_extract.build_parser(extract_p)
 
-    clean_p = subparsers.add_parser(
-        "clean", help="Remove embedded lyrics (SYLT/USLT) from MP3 files"
-    )
+    clean_p = subparsers.add_parser("clean", help="Remove embedded lyrics (SYLT/USLT) from MP3 files")
     lrc_clean.build_parser(clean_p)
 
     type_p = subparsers.add_parser(
@@ -71,9 +67,7 @@ def main() -> None:
     )
     lrc_inspect.build_parser(type_p)
 
-    completions_p = subparsers.add_parser(
-        "completions", help="Output bash completion script to stdout"
-    )
+    completions_p = subparsers.add_parser("completions", help="Output bash completion script to stdout")
 
     args = parser.parse_args()
 
